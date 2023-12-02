@@ -1,0 +1,35 @@
+{
+  "type": "record",
+  "name": "Event",
+  "namespace": "pl.trojczak.flinkpulsar.model",
+  "fields": [
+    {
+      "name": "id",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "name": "key",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "content",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "action",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ]
+}

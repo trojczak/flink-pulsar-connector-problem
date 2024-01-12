@@ -7,16 +7,14 @@ import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.pulsar.sink.PulsarSink;
 import org.apache.flink.connector.pulsar.sink.PulsarSinkBuilder;
 import org.apache.flink.connector.pulsar.sink.PulsarSinkOptions;
-import org.apache.flink.connector.pulsar.sink.writer.serializer.PulsarSerializationSchema;
 import org.apache.flink.connector.pulsar.source.PulsarSource;
 import org.apache.flink.connector.pulsar.source.PulsarSourceBuilder;
 import org.apache.flink.connector.pulsar.source.PulsarSourceOptions;
-import org.apache.flink.connector.pulsar.source.reader.deserializer.PulsarDeserializationSchema;
+import org.apache.flink.connector.pulsar.source.enumerator.cursor.StartCursor;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.pulsar.client.api.Schema;
-import org.apache.pulsar.client.api.SubscriptionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.trojczak.flinkpulsar.function.FunctionKeyedProcessFunction;
@@ -75,10 +73,11 @@ public class RtkTest001Job extends BaseJob {
                 .setAdminUrl(getAdminUrl())
                 .setServiceUrl(getServiceUrl())
                 .setTopics(topic)
-                .setDeserializationSchema(PulsarDeserializationSchema.pulsarSchema(Schema.AVRO(inClass), inClass))
-//                .setDeserializationSchema(Schema.AVRO(inClass), inClass)
+                .setStartCursor(StartCursor.latest())
+//                .setDeserializationSchema(PulsarDeserializationSchema.pulsarSchema(Schema.AVRO(inClass), inClass))
+                .setDeserializationSchema(Schema.AVRO(inClass), inClass)
                 .setSubscriptionName(subscription)
-                .setSubscriptionType(SubscriptionType.Shared)
+//                .setSubscriptionType(SubscriptionType.Shared)
                 .setConfig(PulsarSourceOptions.PULSAR_ACK_RECEIPT_ENABLED, true)
                 .setConfig(PulsarSourceOptions.PULSAR_MAX_FETCH_RECORDS, 1)
                 .setConfig(PulsarSourceOptions.PULSAR_ENABLE_AUTO_ACKNOWLEDGE_MESSAGE, false)
@@ -99,8 +98,8 @@ public class RtkTest001Job extends BaseJob {
                 .setAdminUrl(getAdminUrl())
                 .setServiceUrl(getServiceUrl())
                 .setTopics(topic)
-                .setSerializationSchema(PulsarSerializationSchema.pulsarSchema(Schema.AVRO(outClass), outClass))
-//                .setSerializationSchema(Schema.AVRO(outClass), outClass)
+//                .setSerializationSchema(PulsarSerializationSchema.pulsarSchema(Schema.AVRO(outClass), outClass))
+                .setSerializationSchema(Schema.AVRO(outClass), outClass)
                 .setConfig(PulsarSinkOptions.PULSAR_WRITE_DELIVERY_GUARANTEE, DeliveryGuarantee.EXACTLY_ONCE)
                 .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE);
 

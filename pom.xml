@@ -12,13 +12,24 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jar.name>flink-pulsar-example</jar.name>
+        <jar.name>flink-pulsar-connector-problem</jar.name>
 
         <pulsar.version>2.11.2</pulsar.version>
         <flink.version>1.15.3</flink.version>
         <avro.version>1.10.2</avro.version>
         <flink-connector-pulsar.version>1.15.3</flink-connector-pulsar.version>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>flink17</id>
+            <properties>
+                <pulsar.version>3.0.0</pulsar.version>
+                <flink.version>1.17.2</flink.version>
+                <flink-connector-pulsar.version>4.1.0-1.17</flink-connector-pulsar.version>
+            </properties>
+        </profile>
+    </profiles>
 
     <dependencies>
         <dependency>
@@ -49,6 +60,11 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-avro</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-base</artifactId>
             <version>${flink.version}</version>
         </dependency>
 

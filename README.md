@@ -32,3 +32,13 @@ Schema content:
 {"type":"AVRO","schema":"{\"type\":\"record\",\"name\":\"Event\",\"namespace\":\"pl.trojczak.flinkpulsar.model\",\"fields\":[{\"name\":\"id\",\"type\":[\"null\",\"long\"]},{\"name\":\"key\",\"type\":[\"null\",\"string\"]},{\"name\":\"content\",\"type\":[\"null\",\"string\"]},{\"name\":\"action\",\"type\":[\"null\",\"string\"]}]}","properties":{"__alwaysAllowNull":"true","__jsr310ConversionEnabled":"false"}}
 ```
 
+
+Cleaning:
+
+```bash
+./pulsar-admin topics delete-partitioned-topic persistent://rtk/test001/input
+./pulsar-admin topics delete-partitioned-topic persistent://rtk/test001/output
+
+./pulsar-admin schemas delete persistent://rtk/test001/input
+./pulsar-admin schemas delete persistent://rtk/test001/output
+```

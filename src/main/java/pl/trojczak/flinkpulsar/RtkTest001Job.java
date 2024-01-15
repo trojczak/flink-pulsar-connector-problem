@@ -1,5 +1,7 @@
 package pl.trojczak.flinkpulsar;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.connector.sink2.Sink;
 import org.apache.flink.configuration.Configuration;
@@ -20,9 +22,13 @@ import org.slf4j.LoggerFactory;
 import pl.trojczak.flinkpulsar.function.FunctionKeyedProcessFunction;
 import pl.trojczak.flinkpulsar.model.Event;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class RtkTest001Job extends BaseJob {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RtkTest001Job.class);
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private static final String ADMIN_URL = "http://localhost:8080";
     private static final String ADMIN_URL_ENV = "PULSAR_ADMIN_URL";
@@ -31,6 +37,14 @@ public class RtkTest001Job extends BaseJob {
     private static final String INPUT_TOPIC = "persistent://rtk/test001/input";
     private static final String OUTPUT_TOPIC = "persistent://rtk/test001/output";
     private static final String SUBSCRIPTION = "input-sub";
+    private static final String VP_ENVIRONMENT = "VP_ENVIRONMENT";
+    private static final String TMEDEV = "tmedev";
+    private static final String PULSAR_CLIENT_AUTH_PLUGIN_CLASS_NAME_KEY = "pulsar.client.authPluginClassName";
+    private static final String PULSAR_CLIENT_AUTH_PLUGIN_CLASS_NAME_VALUE =
+        "org.apache.pulsar.client.impl.auth.oauth2.AuthenticationOAuth2";
+    private static final String PULSAR_CLIENT_AUTH_PARAMS_KEY = "pulsar.client.authParams";
+    private static final String ISSUER_URL = "https://auth.streamnative.cloud/";
+    private static final String AUDIENCE = "urn:sn:pulsar:tme:hosted-dev";
 
     public static void main(String[] args) throws Exception {
         PulsarSource<Event> eventPulsarSource = createPulsarSource(INPUT_TOPIC, SUBSCRIPTION, Event.class);
@@ -113,8 +127,30 @@ public class RtkTest001Job extends BaseJob {
 
     private static Configuration prepareAuthentication() {
         Configuration configuration = new Configuration();
-        // TODO
+
+        if (TMEDEV.equals(System.getenv(VP_ENVIRONMENT))) {
+            configuration.setString(
+                PULSAR_CLIENT_AUTH_PLUGIN_CLASS_NAME_KEY,
+                PULSAR_CLIENT_AUTH_PLUGIN_CLASS_NAME_VALUE);
+            configuration.setString(
+                PULSAR_CLIENT_AUTH_PARAMS_KEY,
+                prepareAuthParams());
+        }
+
         return configuration;
+    }
+
+    private static String prepareAuthParams() {
+        Map<String, String> authParamsMap = new HashMap<>();
+        authParamsMap.put("issuerUrl", ISSUER_URL);
+        authParamsMap.put("audience", AUDIENCE);
+        authParamsMap.put("privateKey", "file:/tmp/auth/flinkjobprivatekeysecret");
+
+        try {
+            return OBJECT_MAPPER.writeValueAsString(authParamsMap);
+        } catch (JsonProcessingException ex) {
+            throw new RuntimeException("Unable to serialize auth params map", ex);
+        }
     }
 
     private static String getAdminUrl() {

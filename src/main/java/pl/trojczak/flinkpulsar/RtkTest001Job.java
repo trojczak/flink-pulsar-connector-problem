@@ -45,6 +45,7 @@ public class RtkTest001Job extends BaseJob {
     private static final String PULSAR_CLIENT_AUTH_PARAMS_KEY = "pulsar.client.authParams";
     private static final String ISSUER_URL = "https://auth.streamnative.cloud/";
     private static final String AUDIENCE = "urn:sn:pulsar:tme:hosted-dev";
+    private static final String PRIVATE_KEY_PATH = "PRIVATE_KEY_PATH";
 
     public static void main(String[] args) throws Exception {
         PulsarSource<Event> eventPulsarSource = createPulsarSource(INPUT_TOPIC, SUBSCRIPTION, Event.class);
@@ -144,7 +145,8 @@ public class RtkTest001Job extends BaseJob {
         Map<String, String> authParamsMap = new HashMap<>();
         authParamsMap.put("issuerUrl", ISSUER_URL);
         authParamsMap.put("audience", AUDIENCE);
-        authParamsMap.put("privateKey", "file:/tmp/auth/flinkjobprivatekeysecret");
+        String privateKey = System.getenv(PRIVATE_KEY_PATH);
+        authParamsMap.put("privateKey", privateKey);
 
         try {
             return OBJECT_MAPPER.writeValueAsString(authParamsMap);

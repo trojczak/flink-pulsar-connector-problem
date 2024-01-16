@@ -88,6 +88,6 @@ public class TmeEnvEventProducer {
     }
 
     private static String prepareAuthenticationData() {
-        return "{\"issuerUrl\":\"https://auth.streamnative.cloud/\",\"audience\":\"urn:sn:pulsar:tme:hosted-uat\",\"privateKey\":\"file:///home/rtk/tme-admin.json\"}";
+        return "{\"issuerUrl\":\"https://auth.streamnative.cloud/\",\"audience\":\"urn:sn:pulsar:tme:hosted-dev\",\"privateKey\":\"file:///home/rtk/tme-admin.json\"}";
     }
 }

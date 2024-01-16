@@ -6,6 +6,7 @@ import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.connector.sink2.Sink;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.connector.base.DeliveryGuarantee;
+import org.apache.flink.connector.pulsar.common.config.PulsarOptions;
 import org.apache.flink.connector.pulsar.sink.PulsarSink;
 import org.apache.flink.connector.pulsar.sink.PulsarSinkBuilder;
 import org.apache.flink.connector.pulsar.sink.PulsarSinkOptions;
@@ -98,9 +99,11 @@ public class RtkTest001Job extends BaseJob {
                 .setConfig(PulsarSourceOptions.PULSAR_ENABLE_AUTO_ACKNOWLEDGE_MESSAGE, false)
         ;
 
-        Configuration authenticationConfiguration = prepareAuthentication();
-        if (authenticationConfiguration != null) {
-            builder.setConfig(authenticationConfiguration);
+        String authParams = prepareAuthParams();
+        String vpEnvironmentEnvValue = System.getenv(VP_ENVIRONMENT);
+        if (TMEDEV.equals(vpEnvironmentEnvValue)) {
+            builder.setConfig(PulsarOptions.PULSAR_AUTH_PLUGIN_CLASS_NAME, PULSAR_CLIENT_AUTH_PLUGIN_CLASS_NAME_VALUE);
+            builder.setConfig(PulsarOptions.PULSAR_AUTH_PARAMS, authParams);
         }
 
         return builder.build();
@@ -118,9 +121,11 @@ public class RtkTest001Job extends BaseJob {
                 .setConfig(PulsarSinkOptions.PULSAR_WRITE_DELIVERY_GUARANTEE, DeliveryGuarantee.EXACTLY_ONCE)
                 .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE);
 
-        Configuration authenticationConfiguration = prepareAuthentication();
-        if (authenticationConfiguration != null) {
-            builder.setConfig(authenticationConfiguration);
+        String authParams = prepareAuthParams();
+        String vpEnvironmentEnvValue = System.getenv(VP_ENVIRONMENT);
+        if (TMEDEV.equals(vpEnvironmentEnvValue)) {
+            builder.setConfig(PulsarOptions.PULSAR_AUTH_PLUGIN_CLASS_NAME, PULSAR_CLIENT_AUTH_PLUGIN_CLASS_NAME_VALUE);
+            builder.setConfig(PulsarOptions.PULSAR_AUTH_PARAMS, authParams);
         }
 
         return builder.build();
@@ -129,13 +134,18 @@ public class RtkTest001Job extends BaseJob {
     private static Configuration prepareAuthentication() {
         Configuration configuration = new Configuration();
 
-        if (TMEDEV.equals(System.getenv(VP_ENVIRONMENT))) {
+        String vpEnvironmentEnvValue = System.getenv(VP_ENVIRONMENT);
+        if (TMEDEV.equals(vpEnvironmentEnvValue)) {
             configuration.setString(
                 PULSAR_CLIENT_AUTH_PLUGIN_CLASS_NAME_KEY,
                 PULSAR_CLIENT_AUTH_PLUGIN_CLASS_NAME_VALUE);
+            String authParams = prepareAuthParams();
             configuration.setString(
                 PULSAR_CLIENT_AUTH_PARAMS_KEY,
-                prepareAuthParams());
+                authParams);
+            LOGGER.info("Auth params: {}", authParams);
+        } else {
+            LOGGER.info("{} is not equal to {}", TMEDEV, vpEnvironmentEnvValue);
         }
 
         return configuration;

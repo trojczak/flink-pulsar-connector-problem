@@ -23,6 +23,9 @@ import org.slf4j.LoggerFactory;
 import pl.trojczak.flinkpulsar.function.FunctionKeyedProcessFunction;
 import pl.trojczak.flinkpulsar.model.Event;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -99,11 +102,9 @@ public class RtkTest001Job extends BaseJob {
                 .setConfig(PulsarSourceOptions.PULSAR_ENABLE_AUTO_ACKNOWLEDGE_MESSAGE, false)
         ;
 
-        String authParams = prepareAuthParams();
         String vpEnvironmentEnvValue = System.getenv(VP_ENVIRONMENT);
         if (TMEDEV.equals(vpEnvironmentEnvValue)) {
-            builder.setConfig(PulsarOptions.PULSAR_AUTH_PLUGIN_CLASS_NAME, PULSAR_CLIENT_AUTH_PLUGIN_CLASS_NAME_VALUE);
-            builder.setConfig(PulsarOptions.PULSAR_AUTH_PARAMS, authParams);
+            builder.setConfig(prepareAuthentication());
         }
 
         return builder.build();
@@ -139,10 +140,10 @@ public class RtkTest001Job extends BaseJob {
                 PULSAR_CLIENT_AUTH_PLUGIN_CLASS_NAME_KEY,
                 PULSAR_CLIENT_AUTH_PLUGIN_CLASS_NAME_VALUE);
             String authParams = prepareAuthParams();
+            LOGGER.info("Auth params: {}", authParams);
             configuration.setString(
                 PULSAR_CLIENT_AUTH_PARAMS_KEY,
                 authParams);
-            LOGGER.info("Auth params: {}", authParams);
         } else {
             LOGGER.info("{} is not equal to {}", TMEDEV, vpEnvironmentEnvValue);
         }
@@ -154,8 +155,15 @@ public class RtkTest001Job extends BaseJob {
         Map<String, String> authParamsMap = new HashMap<>();
         authParamsMap.put("issuerUrl", ISSUER_URL);
         authParamsMap.put("audience", AUDIENCE);
-        String privateKey = System.getenv(PRIVATE_KEY_PATH);
-        authParamsMap.put("privateKey", privateKey);
+        String privateKeyPath = System.getenv(PRIVATE_KEY_PATH);
+        authParamsMap.put("privateKey", privateKeyPath);
+
+        try {
+            String privateKeyContentBeginning = Files.readString(Path.of(privateKeyPath)).substring(90);
+            LOGGER.info("[CONFIG] Private key content beginning: {}", privateKeyContentBeginning);
+        } catch (IOException ex) {
+            throw new RuntimeException("Unable to read the content of privateKey.", ex);
+        }
 
         try {
             return OBJECT_MAPPER.writeValueAsString(authParamsMap);

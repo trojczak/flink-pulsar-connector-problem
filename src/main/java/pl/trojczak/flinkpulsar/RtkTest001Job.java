@@ -160,7 +160,7 @@ public class RtkTest001Job extends BaseJob {
 
         try {
             String privateKeyContentBeginning =
-                Files.readString(Path.of(privateKeyPath.substring("file:".length()))).substring(90);
+                Files.readString(Path.of(privateKeyPath.substring("file:".length()))).substring(0, 100);
             LOGGER.info("[CONFIG] Private key content beginning: {}", privateKeyContentBeginning);
         } catch (IOException ex) {
             throw new RuntimeException("Unable to read the content of privateKey.", ex);

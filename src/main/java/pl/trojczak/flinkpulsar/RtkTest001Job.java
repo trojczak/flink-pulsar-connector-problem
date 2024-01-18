@@ -121,11 +121,10 @@ public class RtkTest001Job extends BaseJob {
                 .setConfig(PulsarSinkOptions.PULSAR_WRITE_DELIVERY_GUARANTEE, DeliveryGuarantee.EXACTLY_ONCE)
                 .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE);
 
-        String authParams = prepareAuthParams();
         String vpEnvironmentEnvValue = System.getenv(VP_ENVIRONMENT);
+        LOGGER.info("[CONFIG] {}: {}", VP_ENVIRONMENT, vpEnvironmentEnvValue);
         if (TMEDEV.equals(vpEnvironmentEnvValue)) {
-            builder.setConfig(PulsarOptions.PULSAR_AUTH_PLUGIN_CLASS_NAME, PULSAR_CLIENT_AUTH_PLUGIN_CLASS_NAME_VALUE);
-            builder.setConfig(PulsarOptions.PULSAR_AUTH_PARAMS, authParams);
+            builder.setConfig(prepareAuthentication());
         }
 
         return builder.build();

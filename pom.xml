@@ -14,25 +14,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jar.name>flink-pulsar-connector-problem</jar.name>
 
-        <pulsar.version>2.11.2</pulsar.version>
-        <flink.version>1.15.3</flink.version>
+        <pulsar.version>3.0.1</pulsar.version>
+        <flink.version>1.17.2</flink.version>
+        <flink-connector-pulsar.version>4.1.0-1.17</flink-connector-pulsar.version>
         <avro.version>1.10.2</avro.version>
-        <flink-connector-pulsar.version>1.15.3</flink-connector-pulsar.version>
     </properties>
-
-    <profiles>
-        <profile>
-            <id>flink17</id>
-            <properties>
-                <pulsar.version>3.0.1</pulsar.version>
-                <flink.version>1.17.2</flink.version>
-                <flink-connector-pulsar.version>4.1.0-1.17</flink-connector-pulsar.version>
-            </properties>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-        </profile>
-    </profiles>
 
     <dependencies>
         <dependency>

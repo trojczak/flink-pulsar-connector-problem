@@ -55,7 +55,7 @@ public class TmeEnvEventProducer extends TmeEnvCommon {
 
         List<Event> events = new ArrayList<>();
 
-        for (long i = 1; i <= 2; i++) {
+        for (long i = 1; i <= 100; i++) {
             events.add(new Event(i, "ID1", content, getRandomAction()));
         }
 

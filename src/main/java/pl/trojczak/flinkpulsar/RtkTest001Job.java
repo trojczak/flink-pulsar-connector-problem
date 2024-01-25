@@ -159,8 +159,12 @@ public class RtkTest001Job extends BaseJob {
         authParamsMap.put("privateKey", privateKeyPath);
 
         try {
+            if (privateKeyPath.startsWith("file:")) {
+                privateKeyPath = privateKeyPath.substring("file:".length());
+            }
+
             String privateKeyContentBeginning =
-                Files.readString(Path.of(privateKeyPath.substring("file:".length()))).substring(0, 100);
+                Files.readString(Path.of(privateKeyPath)).substring(0, 100);
             LOGGER.info("[CONFIG] Private key content beginning: {}", privateKeyContentBeginning);
         } catch (IOException ex) {
             throw new RuntimeException("Unable to read the content of privateKey.", ex);

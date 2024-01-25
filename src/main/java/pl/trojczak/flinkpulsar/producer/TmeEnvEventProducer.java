@@ -4,6 +4,7 @@ import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.PulsarClientException;
 import org.apache.pulsar.client.api.Schema;
+import pl.trojczak.flinkpulsar.common.TmeEnvCommon;
 import pl.trojczak.flinkpulsar.model.Event;
 
 import java.io.IOException;
@@ -15,15 +16,13 @@ import java.util.Random;
 
 import static pl.trojczak.flinkpulsar.Commons.INPUT_TOPIC;
 
-public class TmeEnvEventProducer {
+public class TmeEnvEventProducer extends TmeEnvCommon {
 
     private static final Random RANDOM = new Random(12345);
     private static final String DO_NOTHING = "DO_NOTHING";
     private static final String READ = "READ";
     private static final String STORE = "STORE";
     private static final String THROW_EXCEPTION = "THROW_EXCEPTION";
-    private static final String PULSAR_BROKER_URL = "pulsar+ssl://dev-05cb4436-c5c4-4010-848b-74e7a6bc2c73.aws-euw1-snci-duck-prod-snc.aws.snio.cloud:6651";
-    private static final String AUTHENTICATION_OAUTH2 = "org.apache.pulsar.client.impl.auth.oauth2.AuthenticationOAuth2";
 
     public static void main(String[] args) throws PulsarClientException {
         TmeEnvEventProducer eventProducer = new TmeEnvEventProducer();
@@ -42,7 +41,8 @@ public class TmeEnvEventProducer {
     private final Producer<Event> producer;
 
     public TmeEnvEventProducer() throws PulsarClientException {
-        this.client = PulsarClient.builder().serviceUrl(PULSAR_BROKER_URL)
+        this.client = PulsarClient.builder()
+            .serviceUrl(PULSAR_BROKER_URL)
             .authentication(AUTHENTICATION_OAUTH2, prepareAuthenticationData())
             .build();
         this.producer = client.newProducer(Schema.AVRO(Event.class))
@@ -85,9 +85,5 @@ public class TmeEnvEventProducer {
         List<String> actions = List.of(DO_NOTHING, DO_NOTHING, DO_NOTHING, DO_NOTHING, DO_NOTHING, READ, READ, READ, STORE, THROW_EXCEPTION);
         int randomIndex = RANDOM.nextInt(actions.size());
         return actions.get(randomIndex);
-    }
-
-    private static String prepareAuthenticationData() {
-        return "{\"issuerUrl\":\"https://auth.streamnative.cloud/\",\"audience\":\"urn:sn:pulsar:tme:hosted-dev\",\"privateKey\":\"file:///home/rtk/tme-admin.json\"}";
     }
 }

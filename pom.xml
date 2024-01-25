@@ -9,8 +9,8 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jar.name>flink-pulsar-connector-problem</jar.name>
 
@@ -24,10 +24,13 @@
         <profile>
             <id>flink17</id>
             <properties>
-                <pulsar.version>3.0.0</pulsar.version>
+                <pulsar.version>3.0.1</pulsar.version>
                 <flink.version>1.17.2</flink.version>
                 <flink-connector-pulsar.version>4.1.0-1.17</flink-connector-pulsar.version>
             </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
         </profile>
     </profiles>
 
@@ -77,6 +80,11 @@
             <groupId>org.apache.pulsar</groupId>
             <artifactId>pulsar-client-admin-original</artifactId>
             <version>${pulsar.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pulsar</groupId>
+            <artifactId>pulsar-client-all</artifactId>
+            <version>3.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>

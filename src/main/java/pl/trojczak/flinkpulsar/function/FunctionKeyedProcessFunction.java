@@ -17,24 +17,27 @@ import java.util.stream.Collectors;
 public class FunctionKeyedProcessFunction extends KeyedProcessFunction<String, Event, Event> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FunctionKeyedProcessFunction.class);
-    private static final Random RANDOM = new Random(12345);
+    private static final Random RANDOM = new Random();
 
     private ListState<Event> storedEvents;
 
     @Override
-    public void open(Configuration parameters) throws Exception {
+    public void open(Configuration parameters) {
         storedEvents = getRuntimeContext().getListState(new ListStateDescriptor<>("stored-events", Event.class));
     }
 
     @Override
     public void processElement(Event value, Context ctx, Collector<Event> out) throws Exception {
-        LOGGER.info("New event in function: Event(id={}, key={}, action={})",
-                value.getId(), value.getKey(), value.getAction());
+        LOGGER.info("[{}] New event in function: Event(id={}, key={}, action={})",
+            ctx.getCurrentKey(), value.getId(), value.getKey(), value.getAction());
+
+        LOGGER.debug("Pinging a remote service...");
+        pingService();
 
         switch (value.getAction().toString()) {
             case "THROW_EXCEPTION":
-                if (RANDOM.nextInt(3) == 0) {
-                    throw new IllegalArgumentException("THROW_EXCEPTION 1/3 times...");
+                if (RANDOM.nextInt(12) == 0) {
+                    throw new IllegalArgumentException("THROW_EXCEPTION 1/12 times...");
                 }
                 break;
             case "STORE":
@@ -56,5 +59,13 @@ public class FunctionKeyedProcessFunction extends KeyedProcessFunction<String, E
         List<Event> list = new ArrayList<>();
         events.forEach(list::add);
         return list;
+    }
+
+    private void pingService() {
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException ex) {
+            // Ignoring for now
+        }
     }
 }

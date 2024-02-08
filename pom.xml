@@ -14,13 +14,19 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jar.name>flink-pulsar-connector-problem</jar.name>
 
-        <pulsar.version>3.0.1</pulsar.version>
+        <pulsar.version>3.0.2</pulsar.version>
         <flink.version>1.17.2</flink.version>
         <flink-connector-pulsar.version>4.1.0-1.17</flink-connector-pulsar.version>
         <avro.version>1.10.2</avro.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>pl.trojczak.pulsar.common</groupId>
+            <artifactId>rtk-pulsar-common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-java</artifactId>
@@ -64,13 +70,8 @@
         </dependency>
         <dependency>
             <groupId>org.apache.pulsar</groupId>
-            <artifactId>pulsar-client-admin-original</artifactId>
-            <version>${pulsar.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.pulsar</groupId>
             <artifactId>pulsar-client-all</artifactId>
-            <version>3.0.1</version>
+            <version>${pulsar.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>

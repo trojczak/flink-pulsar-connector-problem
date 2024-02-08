@@ -7,7 +7,7 @@
         </encoder>
     </appender>
 
-    <logger name="pl.trojczak.flinkpulsar" level="INFO"/>
+    <logger name="pl.trojczak.flinkpulsar" level="DEBUG"/>
 
     <root level="WARN">
         <appender-ref ref="STDOUT"/>

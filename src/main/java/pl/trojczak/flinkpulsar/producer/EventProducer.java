@@ -27,8 +27,17 @@ public class EventProducer {
     public static void main(String[] args) throws PulsarClientException {
         EventProducer eventProducer = new EventProducer();
 
-        List<Event> events = eventProducer.prepareEvents();
+        int sleepTime = 50;
+
+        List<Event> events = eventProducer.prepareEvents(1_000);
         for (Event event : events) {
+            if (sleepTime > 0) {
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (Exception ex) {
+                    throw new RuntimeException("Exception while sleeping.", ex);
+                }
+            }
             System.out.printf("Producing event: Event(id=%d, key=%s, action=%s)%n",
                     event.getId(), event.getKey(), event.getAction());
             eventProducer.produce(event);
@@ -48,12 +57,12 @@ public class EventProducer {
                 .create();
     }
 
-    public List<Event> prepareEvents() {
+    public List<Event> prepareEvents(long eventNumber) {
         String content = getContent();
 
         List<Event> events = new ArrayList<>();
 
-        for (long i = 1; i <= 100; i++) {
+        for (long i = 1; i <= eventNumber; i++) {
             events.add(new Event(i, "ID1", content, getRandomAction()));
         }
 

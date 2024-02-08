@@ -1,38 +1,31 @@
 package pl.trojczak.flinkpulsar.admin;
 
-import org.apache.pulsar.client.admin.PulsarAdmin;
-import org.apache.pulsar.client.admin.PulsarAdminException;
-import org.apache.pulsar.client.api.MessageId;
 import org.apache.pulsar.client.api.PulsarClientException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import pl.trojczak.pulsar.common.admin.PulsarAdminClient;
 
 import static pl.trojczak.flinkpulsar.Commons.*;
+import static pl.trojczak.flinkpulsar.common.Commons.NAMESPACE;
+import static pl.trojczak.flinkpulsar.common.Commons.TENANT;
 
 public class CleanTopic {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CleanTopic.class);
+    private static final String SCHEMA_PATH = "src/main/resources/schemas/avro/";
+    private static final String RAW_VC_EVENT_TOPIC_SCHEMA = SCHEMA_PATH + "Event.avsc";
 
     public static void main(String[] args) throws PulsarClientException {
-        try (PulsarAdmin pulsarAdmin = PulsarAdmin.builder().serviceHttpUrl(PULSAR_LOCAL_SERVICE_HTTP_URL).build()) {
-            createTopic(pulsarAdmin, INPUT_TOPIC, INPUT_SUB_NAME);
-            createTopic(pulsarAdmin, OUTPUT_TOPIC, null);
-        }
-    }
+        try (PulsarAdminClient pulsarAdminClient = new PulsarAdminClient()) {
+            pulsarAdminClient.createTenant(TENANT);
+            pulsarAdminClient.createNamespace(TENANT, NAMESPACE);
 
-    private static void createTopic(PulsarAdmin pulsarAdmin, String topic, String subName) {
-        try {
-            pulsarAdmin.topics().deletePartitionedTopic(topic, true);
-        } catch (Exception ex) {
-            // Ignore
-        }
-        try {
-            pulsarAdmin.topics().createPartitionedTopic(topic, 1);
-            if (subName != null) {
-                pulsarAdmin.topics().createSubscription(topic, subName, MessageId.earliest);
-            }
-        } catch (PulsarAdminException e) {
-            LOGGER.error(e.getMessage(), e);
+            pulsarAdminClient.deleteTopic(TENANT + "/" + NAMESPACE, INPUT_TOPIC);
+            pulsarAdminClient.deleteTopic(TENANT + "/" + NAMESPACE, OUTPUT_TOPIC);
+
+            pulsarAdminClient.createPartitionedTopic(TENANT, NAMESPACE, INPUT_TOPIC, 1);
+            pulsarAdminClient.createSubscriptionFromEarliest(INPUT_TOPIC, INPUT_SUB_NAME);
+            pulsarAdminClient.createSchema(INPUT_TOPIC, RAW_VC_EVENT_TOPIC_SCHEMA);
+
+            pulsarAdminClient.createPartitionedTopic(TENANT, NAMESPACE, OUTPUT_TOPIC, 1);
+            pulsarAdminClient.createSchema(OUTPUT_TOPIC, RAW_VC_EVENT_TOPIC_SCHEMA);
         }
     }
 }

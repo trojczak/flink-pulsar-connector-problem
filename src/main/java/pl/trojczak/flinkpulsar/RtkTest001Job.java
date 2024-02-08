@@ -71,36 +71,37 @@ public class RtkTest001Job extends BaseJob {
     public void build(StreamExecutionEnvironment environment) {
         String sourceUid = "sourceUid";
         DataStream<Event> eventDataStream =
-                environment.fromSource(source, WatermarkStrategy.noWatermarks(), sourceUid)
-                        .uid(sourceUid);
+            environment.fromSource(source, WatermarkStrategy.noWatermarks(), sourceUid)
+                .uid(sourceUid);
 
         String functionUid = "functionUid";
         SingleOutputStreamOperator<Event> processedEvents = eventDataStream
-                .keyBy(event -> event.getKey().toString())
-                .process(new FunctionKeyedProcessFunction())
-                .uid(functionUid);
+            .keyBy(event -> event.getKey().toString())
+            .process(new FunctionKeyedProcessFunction())
+            .uid(functionUid);
 
         String sinkUid = "sinkUid";
         processedEvents.sinkTo(sink)
-                .name(sinkUid)
-                .uid(sinkUid);
+            .name(sinkUid)
+            .uid(sinkUid);
     }
 
     protected static <IN> PulsarSource<IN> createPulsarSource(String topic, String subscription, Class<IN> inClass) {
         PulsarSourceBuilder<IN> builder = PulsarSource.builder()
-                .setConsumerName("CONSUMER" + topic + "_" + inClass.getSimpleName())
-                .setAdminUrl(getAdminUrl())
-                .setServiceUrl(getServiceUrl())
-                .setTopics(topic)
-                .setStartCursor(StartCursor.latest())
+            .setConsumerName("CONSUMER" + topic + "_" + inClass.getSimpleName())
+            .setAdminUrl(getAdminUrl())
+            .setServiceUrl(getServiceUrl())
+            .setTopics(topic)
+            .setStartCursor(StartCursor.latest())
 //                .setDeserializationSchema(PulsarDeserializationSchema.pulsarSchema(Schema.AVRO(inClass), inClass))
-                .setDeserializationSchema(Schema.AVRO(inClass), inClass)
-                .setSubscriptionName(subscription)
+            .setDeserializationSchema(Schema.AVRO(inClass), inClass)
+            .setSubscriptionName(subscription)
 //                .setSubscriptionType(SubscriptionType.Shared)
-                .setConfig(PulsarSourceOptions.PULSAR_ACK_RECEIPT_ENABLED, true)
-                .setConfig(PulsarSourceOptions.PULSAR_MAX_FETCH_RECORDS, 1)
-                .setConfig(PulsarSourceOptions.PULSAR_ENABLE_AUTO_ACKNOWLEDGE_MESSAGE, false)
-        ;
+            .enableSchemaEvolution()
+            .setConfig(PulsarOptions.PULSAR_ENABLE_TRANSACTION, true)
+            .setConfig(PulsarSourceOptions.PULSAR_ACK_RECEIPT_ENABLED, true)
+            .setConfig(PulsarSourceOptions.PULSAR_MAX_FETCH_RECORDS, 1)
+            .setConfig(PulsarSourceOptions.PULSAR_ENABLE_AUTO_ACKNOWLEDGE_MESSAGE, false);
 
         String vpEnvironmentEnvValue = System.getenv(VP_ENVIRONMENT);
         if (TMEDEV.equals(vpEnvironmentEnvValue)) {
@@ -112,15 +113,16 @@ public class RtkTest001Job extends BaseJob {
 
     private static <IN> Sink<IN> createPulsarSink(String topic, Class<IN> outClass) {
         PulsarSinkBuilder<IN> builder = PulsarSink.builder()
-                .setProducerName("PRODUCER" + topic + "_" + outClass.getSimpleName())
-                .enableSchemaEvolution()
-                .setAdminUrl(getAdminUrl())
-                .setServiceUrl(getServiceUrl())
-                .setTopics(topic)
+            .setProducerName("PRODUCER" + topic + "_" + outClass.getSimpleName())
+            .enableSchemaEvolution()
+            .setAdminUrl(getAdminUrl())
+            .setServiceUrl(getServiceUrl())
+            .setTopics(topic)
 //                .setSerializationSchema(PulsarSerializationSchema.pulsarSchema(Schema.AVRO(outClass), outClass))
-                .setSerializationSchema(Schema.AVRO(outClass), outClass)
-                .setConfig(PulsarSinkOptions.PULSAR_WRITE_DELIVERY_GUARANTEE, DeliveryGuarantee.EXACTLY_ONCE)
-                .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE);
+            .setSerializationSchema(Schema.AVRO(outClass), outClass)
+            .setConfig(PulsarOptions.PULSAR_ENABLE_TRANSACTION, true)
+            .setConfig(PulsarSinkOptions.PULSAR_WRITE_DELIVERY_GUARANTEE, DeliveryGuarantee.EXACTLY_ONCE)
+            .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE);
 
         String vpEnvironmentEnvValue = System.getenv(VP_ENVIRONMENT);
         LOGGER.info("[CONFIG] {}: {}", VP_ENVIRONMENT, vpEnvironmentEnvValue);
